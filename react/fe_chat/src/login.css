@@ -1,0 +1,36 @@
+body {
+  font-family: Arial, sans-serif;
+}
+
+.loginContainer {
+  width: 300px;
+  margin: 0 auto;
+  margin-top: 100px;
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.loginContainer h2 {
+  text-align: center;
+}
+
+.loginContainer label, .loginContainer input[type="text"], .loginContainer input[type="password"] {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.loginContainer input[type="button"] {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.loginContainer input[type="button"]:hover {
+  background-color: #45a049;
+}
