@@ -6,7 +6,7 @@ import './login.css'
 
 let name = "temp";
 let eventSource;
-let host = "http://82.165.30.63:3001"
+let host = "http://www.88858.it:3001"
 
 function App(){
   const [state, setState] = useState("login");
