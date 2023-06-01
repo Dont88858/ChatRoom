@@ -6,6 +6,7 @@ import './login.css'
 
 let name = "temp";
 let eventSource;
+let host = "http://82.165.30.63:3001"
 
 function App(){
   const [state, setState] = useState("login");
@@ -14,7 +15,7 @@ function App(){
   function handleLogin(){
     setState("room");
     name = document.getElementById("Nickname").value;
-    eventSource = new EventSource("http://192.168.40.135:3001/listen?name="+name);
+    eventSource = new EventSource(host+"/listen?name="+name);
     eventSource.onmessage = (event) => {
       updateHistory();
       //setHistory(...History.slice(), event.data)
@@ -26,12 +27,12 @@ function App(){
   }
 
   function handleSend(user, input){
-    fetch("http://192.168.40.135:3001/insert?user="+user+"&input="+input)
+    fetch(host+"/insert?user="+user+"&input="+input)
       .then(() => updateHistory())
   }
 
   function updateHistory(){
-    fetch("http://192.168.40.135:3001/history")
+    fetch(host+"/history")
       .then(res => res.json())
       .then(res => {setHistory(res)})
   }
