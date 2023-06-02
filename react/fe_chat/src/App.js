@@ -3,6 +3,7 @@ import React from 'react';
 import {useState} from 'react';
 import ChatRoom from './ChatRoom'
 import './login.css'
+import $ from 'jquery'
 
 let name = "temp";
 let eventSource;
@@ -49,11 +50,14 @@ function Login({onLogin}){
     <div className="loginContainer">
       <h2>Accesso</h2>
         <label>Insersci tuo Nickname:</label>
-        <input type="text" id="Nickname" name="Nickname" required />
-        <input type="button" value="Login" onClick={() => onLogin()} />
+        <input type="text" id="Nickname" name="Nickname" onKeyDown={(e) => enter(e)} required />
+        <input type="button" value="Login" id="sendlogin" onClick={() => onLogin()} />
   </div>
   )
 }
-
+function enter (e) {
+  if(e.key === "Enter")
+      $('#sendlogin').trigger("click")
+}
 
 export default App;
