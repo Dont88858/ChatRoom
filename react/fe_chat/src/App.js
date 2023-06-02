@@ -10,8 +10,7 @@ let user = {
   id: "",
   eventSource: null
 }
-//let host = "http://www.88858.it:3001"
-let host = "http://192.168.1.4:3001"
+let host = "http://www.88858.it:3001"
 
 function App(){
   const [state, setState] = useState("login");
