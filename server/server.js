@@ -34,7 +34,7 @@ app.get("/history", (req, res)=>{
 app.get("/insert", (req, res) => {
     let params = url.parse(req.url, true).query;
     let query = "insert into chats values(?,?,?)"
-    let now = new Date().toLocaleString();
+    let now = new Date().toJSON().slice(0, 19).replace('T', ' ')
     let data = [params.user, params.input, now]
     
     var connection = mysql.createConnection({
