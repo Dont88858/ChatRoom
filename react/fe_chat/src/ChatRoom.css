@@ -21,8 +21,12 @@ body {
   text-align: center;
 }
 
+.chat-messages {
+  overflow-y: auto
+}
+
 .message-container {
-  margin-bottom: 20px;
+  margin: 0px 20px 20px 20px;
   padding: 3px;
 }
 
@@ -38,25 +42,31 @@ body {
 
 .input-container {
   margin-top: 20px;
+  justify-content: space-between;
+}
+
+.input-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .input-container input[type="text"] {
-  width: 80%;
+  width: 70%;
   padding: 5px;
-  margin-top: 20px;
+  margin-left:25px;
 }
 
 .input-container input[type="button"] {
-  width: 18%;
+  width: 15%;
   background-color: #4CAF50;
   color: white;
   border: none;
   padding: 5px;
+  margin-right:15px;
   cursor: pointer;
-}
-
-.input-container input[type="button"]:hover {
-  background-color: #45a049;
+  border-radius: 8px;
 }
 
 .own-message {

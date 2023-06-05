@@ -13,7 +13,7 @@ app.use(function(req, res, next) {
     next();
 });
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({extended: true}));
 
 const db = {
     host: '82.165.30.63',
@@ -38,21 +38,25 @@ app.get("/history", (req, res)=>{
     connection.end();
 })
 
-app.get("/insert", (req, res) => {
-    let params = url.parse(req.url, true).query;
+app.post("/insert", (req, res) => {
+    let params = req.body;
     let query = "insert into chats values(?,?,?,?)"
-    let now = new Date().toJSON().slice(0, 19).replace('T', ' ')
-    let data = [params.id, params.user, params.input, now]
+    let data = [params.userid, params.username, params.said, mysqlTime(new Date(params.data))]
     
     var connection = mysql.createConnection(db);
     connection.connect();
     connection.query(query, data, function(err, result, fields){
-        if(err) console.log(err)
-        res.send("ok");
-        sendToAll(params.id, params.user, params.input, now);
+        if(err) {
+            console.log(err)
+            res.writeHead(500)
+            res.end("ko")
+        }else{
+            res.end("ok");
+            sendToAll(params);
+        }
     })
     connection.end();
-    info("User: " + params.user + " write message: " + params.input)
+    info("User: " + params.username + " write message: " + params.said, 2)
 })
 
 let users = new Map();
@@ -65,7 +69,7 @@ app.get("/listen", (req, res) => {
     };
     res.writeHead(200, header);
     let params = url.parse(req.url, true).query;
-    info("User: " + params.name + " entered the room")
+    info("User: " + params.name + " entered the room", 1)
     users.set(params.id, {'name': params.name, 'res': res})
     res.write("event: open\n")
     res.write("data: Opening the SSE connection\n\n");
@@ -74,27 +78,32 @@ app.get("/listen", (req, res) => {
         res.write("event: close\n");
         res.write("data: Closing the SSE connection\n\n");
         users.delete(params.id)
-        info("User: " + params.name +" has left the room")
+        info("User: " + params.name +" has left the room", 1)
     })
 })
 
-function sendToAll(id, name, said, time){
+function sendToAll(params){
+    let messaggio = "{"
+                + '"userid": "' + params.userid + '",'
+                + '"username": "' + params.username + '",'
+                + '"said": "' + params.said + '",'
+                + '"data": "' + params.data + '"'
+                + '}\n\n';
     users.forEach((val, key) => {
-        if(key !== id){
+        if(key !== params.userid){
             val.res.write("event: message\n");
-            val.res.write("data: {"
-                + "id" + id + ","
-                + "user:" + name + ","
-                + "said:" + said + ","
-                + "data:" + time 
-                + "}\n\n")
-            info("Send message of " + name + " to: " + val.name)
+            val.res.write("data: " + messaggio)
+            info("Send message of " + params.username + " to: " + val.name, 3)
         }
     })
 }
 
-function info(mes){
-    console.log(new Date().toLocaleTimeString() + " [" + mes + "]\n")
+function mysqlTime(date){
+    return date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
 }
 
-app.listen(3001, () => info("server listening in port 3001"));
+function info(mes, n){
+    console.log(new Date().toLocaleTimeString() + " ".repeat(n) + " [" + mes + "]")
+}
+
+app.listen(3001, () => info("server listening in port 3001", 0));
