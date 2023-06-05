@@ -52,7 +52,7 @@ app.post("/insert", (req, res) => {
             res.end("ko")
         }else{
             res.end("ok");
-            sendToAll(params);
+            sendToAllMes(params);
         }
     })
     connection.end();
@@ -73,28 +73,39 @@ app.get("/listen", (req, res) => {
     users.set(params.id, {'name': params.name, 'res': res})
     res.write("event: open\n")
     res.write("data: Opening the SSE connection\n\n");
+    sendToAllRoom()
 
     req.on('close', () =>{
         res.write("event: close\n");
         res.write("data: Closing the SSE connection\n\n");
         users.delete(params.id)
         info("User: " + params.name +" has left the room", 1)
+        sendToAllRoom()
     })
 })
 
-function sendToAll(params){
-    let messaggio = "{"
-                + '"userid": "' + params.userid + '",'
-                + '"username": "' + params.username + '",'
-                + '"said": "' + params.said + '",'
-                + '"data": "' + params.data + '"'
-                + '}\n\n';
+function sendToAllMes(params){
+    let messaggio = {
+                type: "messaggio",
+                userid: params.userid,
+                username: params.username,
+                said: params.said,
+                data: params.data
+                };
     users.forEach((val, key) => {
         if(key !== params.userid){
             val.res.write("event: message\n");
-            val.res.write("data: " + messaggio)
+            val.res.write("data: " + JSON.stringify(messaggio)+"\n\n")
             info("Send message of " + params.username + " to: " + val.name, 3)
         }
+    })
+}
+
+function sendToAllRoom(){
+    let inRoom = Array.from(users.values()).map(item => item.name)
+    users.forEach((val, key) => {
+        val.res.write("event: message\n");
+        val.res.write("data: " + JSON.stringify({type: "user", inRoom: inRoom})+"\n\n")
     })
 }
 

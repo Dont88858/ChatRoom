@@ -17,12 +17,18 @@ let host = "http://192.168.40.135:3001"
 function App(){
   const [state, setState] = useState("login");
   const [History, setHistory] = useState(null);
-  const NicknameRef = useRef(null)
+  const [Users, setUsers] = useState(null);
+  const NicknameRef = useRef(null);
 
   function handleLogin(){
     user.name = $("#Nickname").val();
     if(!user.name){
       utility.showPopup("Nickname non può essere vuoto", 3000)
+      if(NicknameRef.current)
+        NicknameRef.current.focus();
+      return
+    }else if(/[/"'{}$\\]/.test(user.name)){
+      utility.showPopup("Nickname contiene carattere non valido", 3000)
       if(NicknameRef.current)
         NicknameRef.current.focus();
       return
@@ -33,13 +39,17 @@ function App(){
     user.eventSource = new EventSource(host+"/listen?id="+user.id+"&name="+user.name);
     user.eventSource.onmessage = (e) => {
       let json = JSON.parse(e.data)
-      let newMes = {
-        userid: json.userid,
-        username: json.username,
-        said: json.said,
-        data: json.data
+      if (json.type === "messaggio"){
+        let newMes = {
+          userid: json.userid,
+          username: json.username,
+          said: json.said,
+          data: json.data
+        }
+        setHistory(prev => {return [...prev, newMes]})
+      }else if (json.type === "user"){
+        setUsers(json.inRoom);
       }
-      setHistory(prev => {return [...prev, newMes]})
     };
 
     user.eventSource.onerror = (e) =>{
@@ -68,7 +78,7 @@ function App(){
       },
       body: JSON.stringify(messaggio)
     }).then((res) => {
-      if (res.status == 500){
+      if (res.status === 500){
         utility.showPopup("Avuto un problema sul server, il messaggio non è stato inviato", 7000);
       }else
         setHistory(prev => {return [...prev, messaggio]})
@@ -89,7 +99,7 @@ function App(){
   if(state === "login")
     return <Login onLogin={handleLogin} />
   else{
-    return <ChatRoom user={user} data={History} onSend={handleSend} />;
+    return <ChatRoom user={user} data={History} onSend={handleSend} usersList={Users} />;
   }
 
   function Login({onLogin}){

@@ -43,6 +43,10 @@ function ChatRoom(props){
                 <input type="text" id="input" ref={inputRef} placeholder="Inserisci il tuo messaggio" onKeyDown={(e) => enter(e)} />
                 <input type="button" value="Send" id="send" onClick={() => {props.onSend({id: props.user.id, user: props.user.name, input: $("#input").val()}); $("#input").val(""); if(inputRef.current) inputRef.current.focus();}} />
             </div>
+            <div className="user-list">
+                UserList
+                <ul><ListUser usersList={props.usersList}/></ul>
+            </div>
       </div>
     )
 }
@@ -50,7 +54,7 @@ function ChatRoom(props){
 function Chat(props){
     if (props.data === null) return
     return props.data.map((mes, i) => {
-        if(props.user.name === mes.username){
+        if(props.user.id === mes.userid){
             return (
                 <div key={i} className="message-container own-message">
                     <span style={{float: "left"}} className="timestamp">{new Date(mes.data).getHours().toString().padStart(2, '0')+":"+new Date(mes.data).getMinutes().toString().padStart(2, '0')}</span>
@@ -66,6 +70,15 @@ function Chat(props){
                 </div>)
         }
     })
+}
+let i = 1;
+function ListUser(props){
+    if (props.usersList === null || props.usersList === undefined){
+        return
+    }
+    return (
+        props.usersList.map((item, i) => <li key={i}>{item}</li>)
+    )
 }
 
 function enter(e) {
