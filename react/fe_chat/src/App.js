@@ -9,7 +9,8 @@ import $ from 'jquery'
 let user = {
   name: "temp",
   id: "",
-  eventSource: null
+  eventSource: null,
+  imgName: ""
 }
 let host = "http://192.168.40.135:3001"
 //let host = "http://www.88858.it:3001"
@@ -37,6 +38,13 @@ function App(){
     setState("room");
     user.id = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
     user.eventSource = new EventSource(host+"/listen?id="+user.id+"&name="+user.name);
+
+    user.eventSource.onopen = (e) =>{
+      if (e !== null && e.data !== undefined){
+        user.imgName = JSON.parse(e.data).img;
+      }
+    }
+    
     user.eventSource.onmessage = (e) => {
       let json = JSON.parse(e.data)
       if (json.type === "messaggio"){
@@ -44,7 +52,8 @@ function App(){
           userid: json.userid,
           username: json.username,
           said: json.said,
-          data: json.data
+          data: json.data,
+          imgName: json.imgName
         }
         setHistory(prev => {return [...prev, newMes]})
       }else if (json.type === "user"){
@@ -64,11 +73,13 @@ function App(){
       utility.showPopup("Messaggio non può essere vuoto", 3000);
       return
     }
+
     let messaggio = {
       userid: mes.id,
       username: mes.user,
       said: mes.input,
-      data: new Date()
+      data: new Date(),
+      imgName: user.imgName
     }
     
     fetch(host+"/insert", {

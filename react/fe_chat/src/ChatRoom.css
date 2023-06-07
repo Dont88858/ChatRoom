@@ -28,16 +28,59 @@ body {
 .message-container {
   margin: 0px 20px 20px 20px;
   padding: 3px;
+  position: relative;
 }
 
 .message-container .user {
   font-weight: bold;
   margin-bottom: 5px;
+  position: absolute;
+  top: -15px;
+  width: 100%;
 }
 
-.message-container .timestamp {
+.own-message {
+  text-align: right;
+}
+
+.other-message {
+  text-align: left;
+}
+
+.own-message .user{
+  right: 5px;
+}
+
+.other-message .user{
+  left: 5px;
+}
+
+.own-message .message{
+  position: absolute;
+  right: 55px;
+  top: 20px;
+}
+
+.other-message .message{
+  position: absolute;
+  left: 55px;
+  top: 20px;
+}
+
+.own-message .timestamp {
   font-size: 0.8em;
   color: #999;
+  position: absolute;
+  left: 0;
+  top: 20px;
+}
+
+.other-message .timestamp {
+  font-size: 0.8em;
+  color: #999;
+  position: absolute;
+  top: 20px;
+  right: 0;
 }
 
 .input-container {
@@ -69,14 +112,6 @@ body {
   border-radius: 8px;
 }
 
-.own-message {
-  text-align: right;
-}
-
-.other-message {
-  text-align: left;
-}
-
 .logout-btn {
   background-color: #ff0000;
   color: white;
@@ -92,25 +127,30 @@ body {
 }
 
 .user-list {
-  background-color: #f1f1f1;
+  background-color: #f2f2f2;
+  padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  padding: 10px;
-  max-height: 200px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
   position: fixed;
   bottom: 40px;
   right: 40px;
   width: 200px;
   height: 200px;
   overflow-y: auto;
+  overflow-x: auto;
 }
 
 .user-list ul {
   list-style-type: none;
   padding: 0;
-  margin: 0;
 }
 
-.user-list li {
+.user-list ul li {
   margin-bottom: 5px;
+}
+
+.user-list ul li:last-child {
+  margin-bottom: 0;
 }

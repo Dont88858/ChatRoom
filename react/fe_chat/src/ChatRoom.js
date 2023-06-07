@@ -3,7 +3,7 @@ import './ChatRoom.css'
 import {useRef, useEffect} from 'react'
 import * as utility from './utility'
 
-let roomHeight = 450;
+let roomHeight = 480;
 
 function ChatRoom(props){
     const chatRef = useRef(null);
@@ -27,7 +27,8 @@ function ChatRoom(props){
     }
 
     function oldScrollY(){
-        scrollY.current = (chatRef.current.scrollTop + roomHeight) === chatRef.current.scrollHeight;
+        //per qualche browser che ha una differenza più o meno di 1 //sopratutto Chrome!!!!
+        scrollY.current = Math.abs((chatRef.current.scrollTop + roomHeight) - chatRef.current.scrollHeight) < 1;
     }
 
     return (
@@ -44,7 +45,7 @@ function ChatRoom(props){
                 <input type="button" value="Send" id="send" onClick={() => {props.onSend({id: props.user.id, user: props.user.name, input: $("#input").val()}); $("#input").val(""); if(inputRef.current) inputRef.current.focus();}} />
             </div>
             <div className="user-list">
-                UserList
+                Numero di user in stanza: {(props.usersList === null) ? 0 : props.usersList.length}
                 <ul><ListUser usersList={props.usersList}/></ul>
             </div>
       </div>
@@ -59,26 +60,35 @@ function Chat(props){
                 <div key={i} className="message-container own-message">
                     <span style={{float: "left"}} className="timestamp">{new Date(mes.data).getHours().toString().padStart(2, '0')+":"+new Date(mes.data).getMinutes().toString().padStart(2, '0')}</span>
                     <span className="message">{mes.said}</span>
-                    <span className="user">{" :"+mes.username}</span>
+                    <span className="user">Tu</span>
+                    <Profilo src={mes.imgName} />
                 </div>)
         }else{
             return (
                 <div key={i} className="message-container other-message">
-                    <span className="user">{mes.username+": "}</span>
+                    <Profilo src={mes.imgName} />
+                    <span className="user">{mes.username}</span>
                     <span className="message">{mes.said}</span>
                     <span style={{float: "right"}} className="timestamp">{utility.TimeString(mes.data)}</span>
                 </div>)
         }
     })
 }
-let i = 1;
+
 function ListUser(props){
-    if (props.usersList === null || props.usersList === undefined){
+    if (props.usersList === null){
         return
     }
     return (
-        props.usersList.map((item, i) => <li key={i}>{item}</li>)
+        props.usersList.map((item) => <li key={item.userid}>{item.username}</li>)
     )
+}
+
+function Profilo(src){
+    if (src.src)
+        return (<img src={"/cat/"+src.src} alt="cat" width="40" height="40"></img>)
+    else
+        return (<img src={"/cat/senza titolo.jpg"} alt="balck" width="40" height="40"></img>)
 }
 
 function enter(e) {

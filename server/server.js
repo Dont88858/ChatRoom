@@ -2,6 +2,7 @@ let express = require('express');
 let app = express();
 let mysql = require('mysql');
 let url = require('url');
+let fs = require('fs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
@@ -32,16 +33,19 @@ app.get("/history", (req, res)=>{
     const connection = mysql.createConnection(db);
     connection.connect();
     connection.query("select * from chats;", function(err, result, fields){
-        if(err) console.log(err)
-        res.end(JSON.stringify(result));
+        if(err) {
+            console.log(err);
+            res.status(500).end("ko");
+        }else
+            res.status(200).end(JSON.stringify(result));
     })
     connection.end();
 })
 
 app.post("/insert", (req, res) => {
     let params = req.body;
-    let query = "insert into chats values(?,?,?,?)"
-    let data = [params.userid, params.username, params.said, mysqlTime(new Date(params.data))]
+    let query = "insert into chats values(?,?,?,?,?)"
+    let data = [params.userid, params.username, params.said, mysqlTime(new Date(params.data)), params.imgName]
     
     var connection = mysql.createConnection(db);
     connection.connect();
@@ -51,7 +55,7 @@ app.post("/insert", (req, res) => {
             res.writeHead(500)
             res.end("ko")
         }else{
-            res.end("ok");
+            res.status(200).end("ok");
             sendToAllMes(params);
         }
     })
@@ -70,10 +74,20 @@ app.get("/listen", (req, res) => {
     res.writeHead(200, header);
     let params = url.parse(req.url, true).query;
     info("User: " + params.name + " entered the room", 1)
-    users.set(params.id, {'name': params.name, 'res': res})
-    res.write("event: open\n")
-    res.write("data: Opening the SSE connection\n\n");
-    sendToAllRoom()
+    users.set(params.id, {name: params.name, res: res})
+
+    fs.readdir('../react/fe_chat/public/cat', function(err, files) {
+        if (err) {
+            console.error(err);
+            res.write("event: open\n")
+            res.write("data: " + '{"img": "Senza titolo.jpg"}\n\n');
+        }else{
+            let n = Math.floor(Math.random() * files.length) + 1
+            res.write("event: open\n")
+            res.write("data: " + '{"img": "' + files[n] + '"}\n\n"');
+        }
+        sendToAllRoom()
+    });
 
     req.on('close', () =>{
         res.write("event: close\n");
@@ -85,24 +99,25 @@ app.get("/listen", (req, res) => {
 })
 
 function sendToAllMes(params){
-    let messaggio = {
+    let messaggio = JSON.stringify({
                 type: "messaggio",
                 userid: params.userid,
                 username: params.username,
                 said: params.said,
-                data: params.data
-                };
+                data: params.data,
+                imgName: params.imgName
+                });
     users.forEach((val, key) => {
         if(key !== params.userid){
             val.res.write("event: message\n");
-            val.res.write("data: " + JSON.stringify(messaggio)+"\n\n")
+            val.res.write("data: " + messaggio + "\n\n")
             info("Send message of " + params.username + " to: " + val.name, 3)
         }
     })
 }
 
 function sendToAllRoom(){
-    let inRoom = Array.from(users.values()).map(item => item.name)
+    let inRoom = Array.from(users.entries()).map((entry) => {return {userid: entry[0], username: entry[1].name}})
     users.forEach((val, key) => {
         val.res.write("event: message\n");
         val.res.write("data: " + JSON.stringify({type: "user", inRoom: inRoom})+"\n\n")
