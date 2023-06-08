@@ -1,10 +1,11 @@
-let express = require('express');
-let app = express();
-let mysql = require('mysql');
-let url = require('url');
-let fs = require('fs');
+const express = require('express');
+const app = express();
+const mysql = require('mysql');
+const url = require('url');
+const fs = require('fs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const https = require('https');
 
 app.use(cors());
 app.use(function(req, res, next) {
@@ -132,4 +133,10 @@ function info(mes, n){
     console.log(new Date().toLocaleTimeString() + " ".repeat(n) + " [" + mes + "]")
 }
 
-app.listen(3001, () => info("server listening in port 3001", 0));
+const options = {
+    key: fs.readFileSync("ssl/key.pem"),
+    cert: fs.readFileSync("ssl/cert.pem"),
+};
+
+https.createServer(options, app)
+    .listen(3001, () => info("server listening in port 3001", 0));

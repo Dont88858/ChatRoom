@@ -2,7 +2,7 @@ import $ from 'jquery'
 import './ChatRoom.css'
 import {useRef, useEffect} from 'react'
 import * as utility from './utility'
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer} from 'react-toastify';
 
 let roomHeight = 480;
 

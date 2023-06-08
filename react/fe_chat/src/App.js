@@ -13,7 +13,7 @@ let user = {
   eventSource: null,
   imgName: ""
 }
-let host = "http://192.168.40.135:3001"
+let host = "https://192.168.40.135:3001"
 //let host = "http://www.88858.it:3001"
 
 function App(){
@@ -63,6 +63,7 @@ function App(){
           imgName: json.imgName
         }
         setHistory(prev => {return [...prev, newMes]})
+        notify(newMes);
       }else if (json.type === "user"){
         setUsers(json.inRoom);
       }
@@ -145,4 +146,36 @@ export default App;
 function enter(e) {
   if(e.key === "Enter")
       $('#sendlogin').trigger("click")
+}
+
+let focus = true;
+window.onblur = () => {
+  focus = false;
+};
+
+window.onfocus = function () {
+  focus = true;
+};
+
+function notify(Mes){
+  if(!focus){
+    if ("Notification" in window) {
+      Notification.requestPermission().then((permission) => {
+        
+        if (permission === "granted") {
+          var notification = new Notification(Mes.username, {
+            body:  Mes.said,
+            icon: "/cat/" + Mes.imgName
+          });
+    
+          notification.onclick = () => {
+          };
+  
+          setTimeout(() => {
+            notification.close();
+          }, 5000);
+        }
+      });
+    }
+  }
 }
