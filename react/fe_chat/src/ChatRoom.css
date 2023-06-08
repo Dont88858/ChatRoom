@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-  }
+}
 
 .welcome {
   font-size: 18px;
@@ -85,14 +85,15 @@ body {
 
 .input-container {
   margin-top: 20px;
-  justify-content: space-between;
-}
-
-.input-container {
-  margin-top: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
 }
 
 .input-container input[type="text"] {
@@ -153,4 +154,18 @@ body {
 
 .user-list ul li:last-child {
   margin-bottom: 0;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.custom-file-upload img {
+  margin-left: -30px;
 }

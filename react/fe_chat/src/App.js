@@ -1,8 +1,9 @@
 import './App.css';
 import React, { useEffect } from 'react';
 import {useState, useRef} from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import ChatRoom from './ChatRoom'
-import * as utility from './utility'
 import './login.css'
 import $ from 'jquery'
 
@@ -24,12 +25,18 @@ function App(){
   function handleLogin(){
     user.name = $("#Nickname").val();
     if(!user.name){
-      utility.showPopup("Nickname non può essere vuoto", 3000)
+      toast.warning('Nickname non può essere vuoto!', {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000
+      });
       if(NicknameRef.current)
         NicknameRef.current.focus();
       return
     }else if(/[/"'{}$\\]/.test(user.name)){
-      utility.showPopup("Nickname contiene carattere non valido", 3000)
+      toast.warning('Nickname contiene carattere non valido!', {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000
+      });
       if(NicknameRef.current)
         NicknameRef.current.focus();
       return
@@ -70,7 +77,10 @@ function App(){
 
   function handleSend(mes){
     if(!mes.input){
-      utility.showPopup("Messaggio non può essere vuoto", 3000);
+      toast.warning('Messaggio non può essere vuoto!', {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000
+      });
       return
     }
 
@@ -90,7 +100,10 @@ function App(){
       body: JSON.stringify(messaggio)
     }).then((res) => {
       if (res.status === 500){
-        utility.showPopup("Avuto un problema sul server, il messaggio non è stato inviato", 7000);
+        toast.error('Avuto un problema sul server, il messaggio non è stato inviato!', {
+          position: toast.POSITION.TOP_RIGHT,
+          autoClose: 7000
+        });
       }else
         setHistory(prev => {return [...prev, messaggio]})
     });
@@ -121,6 +134,7 @@ function App(){
         <div className="popup" id="popup"></div>
         <input type="text" id="Nickname" name="Nickname" ref={NicknameRef} onKeyDown={(e) => enter(e)} required />
         <input type="button" value="Login" id="sendlogin" onClick={() => onLogin()} />
+        <ToastContainer />
       </div>
     )
   }

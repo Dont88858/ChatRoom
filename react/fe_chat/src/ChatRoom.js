@@ -2,6 +2,7 @@ import $ from 'jquery'
 import './ChatRoom.css'
 import {useRef, useEffect} from 'react'
 import * as utility from './utility'
+import { ToastContainer, toast } from 'react-toastify';
 
 let roomHeight = 480;
 
@@ -42,12 +43,18 @@ function ChatRoom(props){
             </div>
             <div className="input-container">
                 <input type="text" id="input" ref={inputRef} placeholder="Inserisci il tuo messaggio" onKeyDown={(e) => enter(e)} />
-                <input type="button" value="Send" id="send" onClick={() => {props.onSend({id: props.user.id, user: props.user.name, input: $("#input").val()}); $("#input").val(""); if(inputRef.current) inputRef.current.focus();}} />
+                <label className="custom-file-upload">
+                    <input id="file-upload" type="file" name="image" size="50" />
+                    <img src="/file_log.png" width="20" height="20" alt="file" />
+                </label>
+                <input type="button" value="Send" id="send" onClick={() => {props.onSend({type: "messaggio", id: props.user.id, user: props.user.name, input: $("#input").val()}); $("#input").val(""); if(inputRef.current) inputRef.current.focus();}} />
             </div>
+
             <div className="user-list">
                 Numero di user in stanza: {(props.usersList === null) ? 0 : props.usersList.length}
                 <ul><ListUser usersList={props.usersList}/></ul>
             </div>
+            <ToastContainer />
       </div>
     )
 }
