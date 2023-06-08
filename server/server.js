@@ -5,7 +5,6 @@ const url = require('url');
 const fs = require('fs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const https = require('https');
 
 app.use(cors());
 app.use(function(req, res, next) {
@@ -30,7 +29,7 @@ process.on('SIGINT', () => {
     connection.end();
 });*/
 
-app.get("/history", (req, res)=>{
+app.get("/chat/history", (req, res)=>{
     const connection = mysql.createConnection(db);
     connection.connect();
     connection.query("select * from chats;", function(err, result, fields){
@@ -43,7 +42,7 @@ app.get("/history", (req, res)=>{
     connection.end();
 })
 
-app.post("/insert", (req, res) => {
+app.post("/chat/insert", (req, res) => {
     let params = req.body;
     let query = "insert into chats values(?,?,?,?,?)"
     let data = [params.userid, params.username, params.said, mysqlTime(new Date(params.data)), params.imgName]
@@ -66,7 +65,7 @@ app.post("/insert", (req, res) => {
 
 let users = new Map();
 
-app.get("/listen", (req, res) => {
+app.get("/chat/listen", (req, res) => {
     const header = {
         'Content-Type': 'text/event-stream',
         'Connection': 'Keep-alive',
@@ -133,10 +132,4 @@ function info(mes, n){
     console.log(new Date().toLocaleTimeString() + " ".repeat(n) + " [" + mes + "]")
 }
 
-const options = {
-    key: fs.readFileSync("ssl/key.pem"),
-    cert: fs.readFileSync("ssl/cert.pem"),
-};
-
-https.createServer(options, app)
-    .listen(3001, () => info("server listening in port 3001", 0));
+app.listen(3001, () => info("server listening in port 3001", 0));

@@ -13,8 +13,8 @@ let user = {
   eventSource: null,
   imgName: ""
 }
-let host = "https://192.168.40.135:3001"
-//let host = "http://www.88858.it:3001"
+//let host = "https://192.168.40.135:3001"
+let host = "https://www.88858.it/chat"
 
 function App(){
   const [state, setState] = useState("login");
