@@ -35,7 +35,7 @@ function ChatRoom(props){
     return (
         <div className="chatRoom-container">
             <div className="popup" id="popup"></div>
-            <input type="button" className="logout-btn" onClick={() => {if(props.user.eventSource) props.user.eventSource.close(); window.location.reload()}} value="Logout" />
+            <input type="button" className="logout-btn" onClick={() => {if(props.user.eventSource) props.user.eventSource.close(); window.location.href="/nggyu.mp4"}} value="Logout" />
             <div className="welcome">Welcome, {props.user.name}</div>
             <h2>Chatroom</h2>
             <div className="chat-messages" ref={chatRef} onScroll={oldScrollY} style={{height: roomHeight+"px"}}>

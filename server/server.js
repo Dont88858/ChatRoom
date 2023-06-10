@@ -29,7 +29,7 @@ process.on('SIGINT', () => {
     connection.end();
 });*/
 
-app.get("/chat/history", (req, res)=>{
+app.get("/history", (req, res)=>{
     const connection = mysql.createConnection(db);
     connection.connect();
     connection.query("select * from chats;", function(err, result, fields){
@@ -42,7 +42,7 @@ app.get("/chat/history", (req, res)=>{
     connection.end();
 })
 
-app.post("/chat/insert", (req, res) => {
+app.post("/insert", (req, res) => {
     let params = req.body;
     let query = "insert into chats values(?,?,?,?,?)"
     let data = [params.userid, params.username, params.said, mysqlTime(new Date(params.data)), params.imgName]
@@ -65,11 +65,12 @@ app.post("/chat/insert", (req, res) => {
 
 let users = new Map();
 
-app.get("/chat/listen", (req, res) => {
+app.get("/listen", (req, res) => {
     const header = {
         'Content-Type': 'text/event-stream',
         'Connection': 'Keep-alive',
         'Cache-Control': 'no-cache',
+        'X-Accel-Buffering': 'no'
     };
     res.writeHead(200, header);
     let params = url.parse(req.url, true).query;
@@ -88,7 +89,7 @@ app.get("/chat/listen", (req, res) => {
         }
         sendToAllRoom()
     });
-
+    
     req.on('close', () =>{
         res.write("event: close\n");
         res.write("data: Closing the SSE connection\n\n");
