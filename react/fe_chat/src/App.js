@@ -1,6 +1,5 @@
 import './App.css';
-import React, { useEffect } from 'react';
-import {useState, useRef} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ChatRoom from './ChatRoom'
@@ -13,67 +12,55 @@ let user = {
   eventSource: null,
   imgName: ""
 }
+
+//let host = "http://localhost:3001"
 let host = "https://www.88858.it/chat"
 
-function App(){
-  const [state, setState] = useState("login");
+export default function App(){
+  if (!sessionStorage.getItem("userid")){
+    sessionStorage.clear();
+    window.location.href = "/"
+  }
   const [History, setHistory] = useState(null);
   const [Users, setUsers] = useState(null);
-  const NicknameRef = useRef(null);
+  user.name = sessionStorage.getItem("username");
+  user.id = sessionStorage.getItem("userid");
 
-  function handleLogin(){
-    user.name = $("#Nickname").val();
-    if(!user.name){
-      toast.warning('Nickname non può essere vuoto!', {
-        position: toast.POSITION.TOP_RIGHT,
-        autoClose: 3000
-      });
-      if(NicknameRef.current)
-        NicknameRef.current.focus();
-      return
-    }else if(/[/"'{}$\\]/.test(user.name)){
-      toast.warning('Nickname contiene carattere non valido!', {
-        position: toast.POSITION.TOP_RIGHT,
-        autoClose: 3000
-      });
-      if(NicknameRef.current)
-        NicknameRef.current.focus();
-      return
-    }
-
-    setState("room");
-    user.id = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
-    user.eventSource = new EventSource(host+"/listen?id="+user.id+"&name="+user.name);
-
-    user.eventSource.onopen = (e) =>{
-      if (e !== null && e.data !== undefined){
-        user.imgName = JSON.parse(e.data).img;
-      }
-    }
-    
-    user.eventSource.onmessage = (e) => {
-      let json = JSON.parse(e.data)
-      if (json.type === "messaggio"){
-        let newMes = {
-          userid: json.userid,
-          username: json.username,
-          said: json.said,
-          data: json.data,
-          imgName: json.imgName
+  useEffect(() => {
+    if (sessionStorage.getItem("userid")){
+      user.eventSource = new EventSource(host+"/listen?id="+user.id+"&name="+user.name);
+      sessionStorage.setItem("eventSource", user.eventSource);
+      user.eventSource.onopen = (e) =>{
+        if (e !== null && e.data !== undefined){
+          user.imgName = JSON.parse(e.data).img;
+          sessionStorage.setItem("imgName", user.imgName);
         }
-        setHistory(prev => {return [...prev, newMes]})
-        notify(newMes);
-      }else if (json.type === "user"){
-        setUsers(json.inRoom);
       }
-    };
+      
+      user.eventSource.onmessage = (e) => {
+        let json = JSON.parse(e.data)
+        if (json.type === "messaggio"){
+          let newMes = {
+            userid: json.userid,
+            username: json.username,
+            said: json.said,
+            data: json.data,
+            imgName: json.imgName
+          }
+          setHistory(prev => {return [...prev, newMes]})
+          notify(newMes);
+        }else if (json.type === "user"){
+          setUsers(json.inRoom);
+        }
+      };
 
-    user.eventSource.onerror = (e) =>{
-      console.log(e);
+      user.eventSource.onerror = (e) =>{
+        console.log(e);
+      }
+      
+      updateHistory();
     }
-    
-    updateHistory();
-  }
+  }, [])
 
   function handleSend(mes){
     if(!mes.input){
@@ -115,32 +102,66 @@ function App(){
       .then(res => {setHistory(res)})
   }
 
+  function handleLogout(user){
+    return fetch(host+"/logout", {
+      method: "POST",
+      headers: { 'Connection': 'close', "Content-Type": "application/json"},
+      body: JSON.stringify({id: user.id, name: user.name}),
+      keepalive: true
+    })
+  }
+
+  if (sessionStorage.getItem("userid")){
+    return <ChatRoom user={user} data={History} onSend={handleSend} usersList={Users} onLogout={handleLogout} />;
+  }else
+    return
+}
+
+export function Login(){
+
+  const NicknameRef = useRef(null);
+
+  function handleLogin(){
+    user.name = $("#Nickname").val();
+    if(!user.name){
+      toast.warning('Nickname non può essere vuoto!', {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000
+      });
+      if(NicknameRef.current)
+        NicknameRef.current.focus();
+      return
+    }else if(/[/"'{}$\\]/.test(user.name)){
+      toast.warning('Nickname contiene carattere non valido!', {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000
+      });
+      if(NicknameRef.current)
+        NicknameRef.current.focus();
+      return
+    }
+    user.id = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+    sessionStorage.setItem("username", user.name);
+    sessionStorage.setItem("userid", user.id);
+    window.location.href = "/ChatRoom"
+  }
+
   useEffect(() => {
     if(NicknameRef.current)
       NicknameRef.current.focus()
   }, [])
 
-  if(state === "login")
-    return <Login onLogin={handleLogin} />
-  else{
-    return <ChatRoom user={user} data={History} onSend={handleSend} usersList={Users} />;
-  }
-
-  function Login({onLogin}){
-    return (
-      <div className="loginContainer">
-        <h2>Accesso</h2>
-        <label>Insersci tuo Nickname:</label>
-        <div className="popup" id="popup"></div>
-        <input type="text" id="Nickname" name="Nickname" ref={NicknameRef} onKeyDown={(e) => enter(e)} required />
-        <input type="button" value="Login" id="sendlogin" onClick={() => onLogin()} />
-        <ToastContainer />
-      </div>
-    )
-  }
+  return (
+    <div className="loginContainer">
+      <h2>Accesso</h2>
+      <label>Insersci tuo Nickname:</label>
+      <div className="popup" id="popup"></div>
+      <input type="text" id="Nickname" name="Nickname" ref={NicknameRef} onKeyDown={(e) => enter(e)} required />
+      <input type="button" value="Login" id="sendlogin" onClick={handleLogin} />
+      <ToastContainer />
+    </div>
+  )
 }
-
-export default App;
 
 function enter(e) {
   if(e.key === "Enter")

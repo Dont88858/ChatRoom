@@ -89,25 +89,28 @@ app.get("/listen", (req, res) => {
         }
         sendToAllRoom()
     });
-    
-    req.on('close', () =>{
-        res.write("event: close\n");
-        res.write("data: Closing the SSE connection\n\n");
-        users.delete(params.id)
-        info("User: " + params.name +" has left the room", 1)
-        sendToAllRoom()
-    })
+})
+
+app.post("/logout", (req, res) => {
+    let params = req.body;
+    let resSSE = users.get(params.id).res;
+    resSSE.write("event: close\n");
+    resSSE.write("data: Closing the SSE connection\n\n");
+    users.delete(params.id)
+    res.sendStatus(200);
+    info("User: " + params.name +" has left the room", 1)
+    sendToAllRoom()
 })
 
 function sendToAllMes(params){
     let messaggio = JSON.stringify({
-                type: "messaggio",
-                userid: params.userid,
-                username: params.username,
-                said: params.said,
-                data: params.data,
-                imgName: params.imgName
-                });
+        type: "messaggio",
+        userid: params.userid,
+        username: params.username,
+        said: params.said,
+        data: params.data,
+        imgName: params.imgName
+    });
     users.forEach((val, key) => {
         if(key !== params.userid){
             val.res.write("event: message\n");

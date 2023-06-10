@@ -6,36 +6,55 @@ import { ToastContainer} from 'react-toastify';
 
 let roomHeight = 480;
 
-function ChatRoom(props){
+export default function ChatRoom(props){
     const chatRef = useRef(null);
     const scrollY = useRef(true);
     const inputRef = useRef(null);
+    const logoutHandle = useRef(() => {
+        if(props.user.eventSource) {
+            props.onLogout(props.user)
+            props.user.eventSource.close();
+            props.user.eventSource = null;
+            sessionStorage.clear();
+        }
+    })
     
     useEffect(() => {
         scrollBottom();
     }, [props.data])
-
-    useEffect(() => {
-        if(inputRef.current)
-            inputRef.current.focus();
-    }, [])
 
     function scrollBottom(){
         if(chatRef.current){
             if(scrollY.current)
                 chatRef.current.scrollTop = chatRef.current.scrollHeight;
         }
-    }
-
+    }    
+    
     function oldScrollY(){
         //per qualche browser che ha una differenza più o meno di 1 //sopratutto Chrome!!!!
         scrollY.current = Math.abs((chatRef.current.scrollTop + roomHeight) - chatRef.current.scrollHeight) < 1;
     }
 
+    useEffect(() => {
+        const foo = () => {
+            setTimeout(() => {
+                logoutHandle.current();
+            }, 0);
+        }
+        window.addEventListener("beforeunload", foo)
+        window.addEventListener("popstate", foo);
+        if(inputRef.current)
+            inputRef.current.focus();
+        return () => {
+            window.removeEventListener("beforeunload", foo)
+            window.removeEventListener("popstate", foo);
+        }
+    }, [])
+
     return (
         <div className="chatRoom-container">
             <div className="popup" id="popup"></div>
-            <input type="button" className="logout-btn" onClick={() => {if(props.user.eventSource) props.user.eventSource.close(); window.location.href="/nggyu.mp4"}} value="Logout" />
+            <input type="button" className="logout-btn" onClick={() => logoutHandle.current()} value="Logout" />
             <div className="welcome">Welcome, {props.user.name}</div>
             <h2>Chatroom</h2>
             <div className="chat-messages" ref={chatRef} onScroll={oldScrollY} style={{height: roomHeight+"px"}}>
@@ -102,5 +121,3 @@ function enter(e) {
     if(e.key === "Enter")
         $('#send').trigger("click")
 }
-
-export default ChatRoom;
