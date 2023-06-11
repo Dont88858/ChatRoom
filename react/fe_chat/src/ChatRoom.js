@@ -12,7 +12,6 @@ export default function ChatRoom(props){
     const scrollY = useRef(true);
     const inputRef = useRef(null);
     const logoutHandle = useRef(() => {
-        
         if(props.user.eventSource) {
             $.ajax({
                 async: false,

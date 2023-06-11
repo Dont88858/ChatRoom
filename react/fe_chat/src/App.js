@@ -17,7 +17,7 @@ let user = {
 export let host = "https://www.88858.it/chat"
 
 export default function App(){
-  if (!sessionStorage.getItem("userid")){
+  if (!sessionStorage.getItem("username")){
     sessionStorage.clear();
     window.location.href = "/"
   }
@@ -122,7 +122,7 @@ export function Login(){
   const NicknameRef = useRef(null);
 
   function handleLogin(){
-    user.name = $("#Nickname").val();
+    user.name = NicknameRef.current.value
     if(!user.name){
       toast.warning('Nickname non può essere vuoto!', {
         position: toast.POSITION.TOP_RIGHT,
@@ -139,6 +139,14 @@ export function Login(){
       if(NicknameRef.current)
         NicknameRef.current.focus();
       return
+    }else if("null" === user.name){
+      toast.warning('Non puoi utilizzare nome "null"', {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000
+      });
+      if(NicknameRef.current)
+        NicknameRef.current.focus();
+      return
     }
     user.id = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
     sessionStorage.setItem("username", user.name);
@@ -149,7 +157,6 @@ export function Login(){
   useEffect(() => {
     if(NicknameRef.current){
       NicknameRef.current.focus();
-      NicknameRef.current.value = "";
     }
   }, [])
 
