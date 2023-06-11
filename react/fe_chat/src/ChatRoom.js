@@ -3,6 +3,7 @@ import './ChatRoom.css'
 import {useRef, useEffect} from 'react'
 import * as utility from './utility'
 import { ToastContainer} from 'react-toastify';
+import { host } from './App'
 
 let roomHeight = 480;
 
@@ -11,8 +12,16 @@ export default function ChatRoom(props){
     const scrollY = useRef(true);
     const inputRef = useRef(null);
     const logoutHandle = useRef(() => {
+        
         if(props.user.eventSource) {
-            props.onLogout(props.user)
+            $.ajax({
+                async: false,
+                url: host+"/logout",
+                method: "POST",
+                headers: { 'Connection': 'close', "Content-Type": "application/json"},
+                data: JSON.stringify({id: props.user.id, name: props.user.name}),
+                keepalive: true
+            })
             props.user.eventSource.close();
             props.user.eventSource = null;
             sessionStorage.clear();
@@ -36,25 +45,29 @@ export default function ChatRoom(props){
     }
 
     useEffect(() => {
-        const foo = () => {
-            setTimeout(() => {
-                logoutHandle.current();
-            }, 0);
-        }
+        let foo = () => logoutHandle.current();
         window.addEventListener("beforeunload", foo)
-        window.addEventListener("popstate", foo);
         if(inputRef.current)
             inputRef.current.focus();
         return () => {
             window.removeEventListener("beforeunload", foo)
-            window.removeEventListener("popstate", foo);
         }
     }, [])
 
     return (
         <div className="chatRoom-container">
             <div className="popup" id="popup"></div>
-            <input type="button" className="logout-btn" onClick={() => logoutHandle.current()} value="Logout" />
+            <input type="button" className="logout-btn" onClick={() => {if(props.user.eventSource) {
+                        props.onLogout(props.user)
+                            .then(() => {
+                                props.user.eventSource.close();
+                                props.user.eventSource = null;
+                                sessionStorage.clear();
+                                window.location.href = "/"
+                            })
+                    }
+                }
+            } value="Logout" />
             <div className="welcome">Welcome, {props.user.name}</div>
             <h2>Chatroom</h2>
             <div className="chat-messages" ref={chatRef} onScroll={oldScrollY} style={{height: roomHeight+"px"}}>

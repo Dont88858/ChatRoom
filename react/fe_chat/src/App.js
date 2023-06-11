@@ -13,8 +13,8 @@ let user = {
   imgName: ""
 }
 
-//let host = "http://localhost:3001"
-let host = "https://www.88858.it/chat"
+//export let host = "http://localhost:3001"
+export let host = "https://www.88858.it/chat"
 
 export default function App(){
   if (!sessionStorage.getItem("userid")){
@@ -147,8 +147,10 @@ export function Login(){
   }
 
   useEffect(() => {
-    if(NicknameRef.current)
-      NicknameRef.current.focus()
+    if(NicknameRef.current){
+      NicknameRef.current.focus();
+      NicknameRef.current.value = "";
+    }
   }, [])
 
   return (
