@@ -5,7 +5,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import ChatRoom from './ChatRoom'
 import './login.css'
 import $ from 'jquery'
-
 let user = {
   name: "temp",
   id: "",
@@ -53,10 +52,6 @@ export default function App(){
           setUsers(json.inRoom);
         }
       };
-
-      user.eventSource.onerror = (e) =>{
-        console.log(e);
-      }
       
       updateHistory();
     }
@@ -74,7 +69,7 @@ export default function App(){
     let messaggio = {
       userid: mes.id,
       username: mes.user,
-      said: mes.input,
+      said: mes.input.replace("\\n", "\n"),
       data: new Date(),
       imgName: user.imgName
     }

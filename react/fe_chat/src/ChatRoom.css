@@ -23,64 +23,63 @@ body {
 
 .chat-messages {
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .message-container {
-  margin: 0px 20px 20px 20px;
+  margin: 0px 20px 0px 20px;
   padding: 3px;
-  position: relative;
+  width: auto;
 }
 
 .message-container .user {
   font-weight: bold;
   margin-bottom: 5px;
-  position: absolute;
-  top: -15px;
-  width: 100%;
+  width: 5%;
 }
 
-.own-message {
-  text-align: right;
+.own-message .user {
+  float: right;
 }
 
-.other-message {
-  text-align: left;
+.other-message .user {
+  float: left;
 }
 
-.own-message .user{
-  right: 5px;
-}
-
-.other-message .user{
-  left: 5px;
+.message {
+  margin-top: 20px;
+  padding-right: 2.5%;
+  padding-left: 2.5%;
+  width: 80%;
+  text-align: justify;
+  overflow-y: scroll;
+  white-space: pre-line;
 }
 
 .own-message .message{
-  position: absolute;
-  right: 55px;
-  top: 20px;
+  float: right;
 }
 
 .other-message .message{
-  position: absolute;
-  left: 55px;
-  top: 20px;
+  float: left;
+}
+
+.timestamp{
+  margin-top: 20px;
+  font-size: 0.8em;
+  color: #999;
+  width: 10%;
 }
 
 .own-message .timestamp {
-  font-size: 0.8em;
-  color: #999;
-  position: absolute;
-  left: 0;
-  top: 20px;
+  float: left;
+  text-align: left;
 }
 
 .other-message .timestamp {
-  font-size: 0.8em;
-  color: #999;
-  position: absolute;
-  top: 20px;
-  right: 0;
+  float: right;
+  text-align: right;
 }
 
 .input-container {
@@ -100,6 +99,7 @@ body {
   width: 70%;
   padding: 5px;
   margin-left:25px;
+  white-space: pre-line;
 }
 
 .input-container input[type="button"] {

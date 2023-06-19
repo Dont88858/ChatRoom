@@ -62,7 +62,7 @@ export default function ChatRoom(props){
                                 props.user.eventSource.close();
                                 props.user.eventSource = null;
                                 sessionStorage.clear();
-                                window.location.href = "/"
+                                window.location.href = "/nggyu.mp4"
                             })
                     }
                 }
@@ -73,7 +73,7 @@ export default function ChatRoom(props){
                 <Chat user={props.user} data={props.data}/>
             </div>
             <div className="input-container">
-                <input type="text" id="input" ref={inputRef} placeholder="Inserisci il tuo messaggio" onKeyDown={(e) => enter(e)} />
+                <input type="text" id="input" ref={inputRef} placeholder="Inserisci il tuo messaggio (usare \n per andare a capo)" onKeyDown={(e) => enter(e)} />
                 <label className="custom-file-upload">
                     <input id="file-upload" type="file" name="image" size="50" />
                     <img src="/file_log.png" width="20" height="20" alt="file" />
@@ -96,18 +96,22 @@ function Chat(props){
         if(props.user.id === mes.userid){
             return (
                 <div key={i} className="message-container own-message">
-                    <span style={{float: "left"}} className="timestamp">{new Date(mes.data).getHours().toString().padStart(2, '0')+":"+new Date(mes.data).getMinutes().toString().padStart(2, '0')}</span>
+                    <span className="timestamp">{new Date(mes.data).getHours().toString().padStart(2, '0')+":"+new Date(mes.data).getMinutes().toString().padStart(2, '0')}</span>
+                    <span className="user">
+                        <div>Tu</div>
+                        <div><Profilo src={mes.imgName} /></div>
+                    </span>
                     <span className="message">{mes.said}</span>
-                    <span className="user">Tu</span>
-                    <Profilo src={mes.imgName} />
                 </div>)
         }else{
             return (
                 <div key={i} className="message-container other-message">
-                    <Profilo src={mes.imgName} />
-                    <span className="user">{mes.username}</span>
+                    <span className="user">
+                        <div>{mes.username}</div>
+                        <div><Profilo src={mes.imgName} /></div>
+                    </span>
                     <span className="message">{mes.said}</span>
-                    <span style={{float: "right"}} className="timestamp">{utility.TimeString(mes.data)}</span>
+                    <span className="timestamp">{utility.TimeString(mes.data)}</span>
                 </div>)
         }
     })

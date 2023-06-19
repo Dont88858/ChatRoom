@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import Page from './page';
 import reportWebVitals from './reportWebVitals';
+import { fairyDustCursor } from "cursor-effects";
+new fairyDustCursor({
+  colors: ["#ff0000", "#00ff00", "#0000ff"],
+});
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
