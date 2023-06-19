@@ -69,11 +69,11 @@ export default function App(){
     let messaggio = {
       userid: mes.id,
       username: mes.user,
-      said: mes.input.replace("\\n", "\n"),
+      said: mes.input.replaceAll("\\n", "\n"),
       data: new Date(),
       imgName: user.imgName
     }
-    
+
     fetch(host+"/insert", {
       method: "POST",
       headers: {
