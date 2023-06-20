@@ -38,7 +38,6 @@ export default function App(){
       
       user.eventSource.onmessage = (e) => {
         let json = JSON.parse(e.data)
-        console.log(json)
         if (json.type === "messaggio"){
           let newMes = {
             userid: json.userid,
@@ -162,10 +161,17 @@ export function Login(){
       NicknameRef.current.focus();
     }
     if(sessionStorage.getItem("expired") !== null){
-      toast.info('Sessione scaduto', {
-        position: toast.POSITION.TOP_RIGHT,
-        autoClose: 1000*60
-      });
+      if(sessionStorage.getItem("expired") === "null"){
+        toast.info('Sessione scaduto', {
+          position: toast.POSITION.TOP_RIGHT,
+          autoClose: 1000*60
+        });
+      }else if (sessionStorage.getItem("expired") === "not null"){
+        toast.info('Hah get Rick Rolled', {
+          position: toast.POSITION.TOP_RIGHT,
+          autoClose: 1000*10
+        });
+      }
       sessionStorage.removeItem("expired");
     }
   }, [])

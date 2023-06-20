@@ -65,7 +65,7 @@ app.post("/insert", (req, res) => {
     clearTimeout(userCurr.timer);
     userCurr.timer = setTimeout(() => {
         timerSession(params.userid);
-    }, 1000*5);
+    }, 1000*60*60);
     users.set(params.userid, userCurr);
     info("User: " + params.username + " write message: " + params.said, 2)
 })
@@ -85,7 +85,7 @@ app.get("/listen", (req, res) => {
 
     let timeOut = setTimeout(() => {
         timerSession(params.id);
-    }, 1000*5);
+    }, 1000*60*60);
     users.set(params.id, {name: params.name, res: res, timer: timeOut})
 
     fs.readdir('../react/fe_chat/public/cat', function(err, files) {

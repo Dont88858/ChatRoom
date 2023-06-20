@@ -62,6 +62,7 @@ export default function ChatRoom(props){
                                 props.user.eventSource.close();
                                 props.user.eventSource = null;
                                 sessionStorage.clear();
+                                sessionStorage.setItem("expired", "not null")
                                 window.location.href = "/nggyu.mp4"
                             })
                     }
