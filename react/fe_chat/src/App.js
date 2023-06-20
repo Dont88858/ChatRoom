@@ -17,7 +17,11 @@ export let host = "https://www.88858.it/chat"
 
 export default function App(){
   if (!sessionStorage.getItem("username")){
-    sessionStorage.clear();
+    if(sessionStorage.getItem("expired") && sessionStorage.getItem("expired") === "not null"){
+      sessionStorage.clear();
+      sessionStorage.setItem("expired", "not null");
+    }else
+      sessionStorage.clear();
     window.location.href = "/"
   }
   const [History, setHistory] = useState(null);
