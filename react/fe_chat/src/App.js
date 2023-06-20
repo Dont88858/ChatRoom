@@ -12,8 +12,8 @@ let user = {
   imgName: ""
 }
 
-export let host = "http://localhost:3001"
-//export let host = "https://www.88858.it/chat"
+//export let host = "http://localhost:3001"
+export let host = "https://www.88858.it/chat"
 
 export default function App(){
   if (!sessionStorage.getItem("username")){
@@ -162,12 +162,12 @@ export function Login(){
     }
     if(sessionStorage.getItem("expired") !== null){
       if(sessionStorage.getItem("expired") === "null"){
-        toast.info('Sessione scaduto', {
+        toast.info('Sessione scaduto!', {
           position: toast.POSITION.TOP_RIGHT,
           autoClose: 1000*60
         });
       }else if (sessionStorage.getItem("expired") === "not null"){
-        toast.info('Hah get Rick Rolled', {
+        toast.info('Ahah, get Rick Rolled!', {
           position: toast.POSITION.TOP_RIGHT,
           autoClose: 1000*10
         });
