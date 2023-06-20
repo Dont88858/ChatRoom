@@ -12,8 +12,8 @@ let user = {
   imgName: ""
 }
 
-//export let host = "http://localhost:3001"
-export let host = "https://www.88858.it/chat"
+export let host = "http://localhost:3001"
+//export let host = "https://www.88858.it/chat"
 
 export default function App(){
   if (!sessionStorage.getItem("username")){
@@ -38,6 +38,7 @@ export default function App(){
       
       user.eventSource.onmessage = (e) => {
         let json = JSON.parse(e.data)
+        console.log(json)
         if (json.type === "messaggio"){
           let newMes = {
             userid: json.userid,
@@ -50,6 +51,13 @@ export default function App(){
           notify(newMes);
         }else if (json.type === "user"){
           setUsers(json.inRoom);
+        }else if (json.type === "close"){
+          console.log("closing");
+          user.eventSource.close();
+          user.eventSource = null;
+          sessionStorage.clear();
+          sessionStorage.setItem("expired", "null");
+          window.location.href = "/"
         }
       };
       
@@ -152,6 +160,13 @@ export function Login(){
   useEffect(() => {
     if(NicknameRef.current){
       NicknameRef.current.focus();
+    }
+    if(sessionStorage.getItem("expired") !== null){
+      toast.info('Sessione scaduto', {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 1000*60
+      });
+      sessionStorage.removeItem("expired");
     }
   }, [])
 

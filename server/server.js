@@ -60,6 +60,13 @@ app.post("/insert", (req, res) => {
         }
     })
     connection.end();
+    
+    let userCurr = users.get(params.userid);
+    clearTimeout(userCurr.timer);
+    userCurr.timer = setTimeout(() => {
+        timerSession(params.userid);
+    }, 1000*5);
+    users.set(params.userid, userCurr);
     info("User: " + params.username + " write message: " + params.said, 2)
 })
 
@@ -74,8 +81,12 @@ app.get("/listen", (req, res) => {
     };
     res.writeHead(200, header);
     let params = url.parse(req.url, true).query;
-    info("User: " + params.name + " entered the room", 1)
-    users.set(params.id, {name: params.name, res: res})
+    info("User: " + params.name + " entered the room", 1);
+
+    let timeOut = setTimeout(() => {
+        timerSession(params.id);
+    }, 1000*5);
+    users.set(params.id, {name: params.name, res: res, timer: timeOut})
 
     fs.readdir('../react/fe_chat/public/cat', function(err, files) {
         if (err) {
@@ -96,6 +107,7 @@ app.post("/logout", (req, res) => {
     let resSSE = users.get(params.id).res;
     resSSE.write("event: close\n");
     resSSE.write("data: Closing the SSE connection\n\n");
+    clearTimeout(users.get(params.id).timer);
     users.delete(params.id)
     res.sendStatus(200);
     info("User: " + params.name +" has left the room", 1)
@@ -124,8 +136,17 @@ function sendToAllRoom(){
     let inRoom = Array.from(users.entries()).map((entry) => {return {userid: entry[0], username: entry[1].name}})
     users.forEach((val, key) => {
         val.res.write("event: message\n");
-        val.res.write("data: " + JSON.stringify({type: "user", inRoom: inRoom})+"\n\n")
+        val.res.write("data: " + JSON.stringify({type: "user", inRoom: inRoom}) + "\n\n")
     })
+}
+
+function timerSession(id) {
+    let userCurr = users.get(id);
+    userCurr.res.write("event: message\n");
+    userCurr.res.write("data: " + JSON.stringify({type: "close", messaggio: "Closing the SSE connection"}) + "\n\n");
+    users.delete(id)
+    info("User: " + userCurr.name + " session expired", 1)
+    sendToAllRoom()
 }
 
 function mysqlTime(date){
