@@ -104,11 +104,15 @@ app.get("/listen", (req, res) => {
 
 app.post("/logout", (req, res) => {
     let params = req.body;
-    let resSSE = users.get(params.id).res;
-    resSSE.write("event: close\n");
-    resSSE.write("data: Closing the SSE connection\n\n");
-    clearTimeout(users.get(params.id).timer);
-    users.delete(params.id)
+    let userCurr = users.get(params.id)
+    if(userCurr && userCurr.res){
+        let resSSE = userCurr.res;
+        resSSE.write("event: close\n");
+        resSSE.write("data: Closing the SSE connection\n\n");
+        if (userCurr)
+            clearTimeout(userCurr.timer);
+        users.delete(params.id)
+    }
     res.sendStatus(200);
     info("User: " + params.name +" has left the room", 1)
     sendToAllRoom()
