@@ -5,6 +5,7 @@ const url = require('url');
 const fs = require('fs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const multer = require('multer');
 
 app.use(cors());
 app.use(function(req, res, next) {
@@ -13,8 +14,19 @@ app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Headers', 'Origin, Content-Type, Accept');
     next();
 });
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, '../file');
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+const upload = multer({storage: storage});
+
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({extended: false}));
 
 const db = {
     host: '82.165.30.63',
@@ -44,8 +56,8 @@ app.get("/history", (req, res)=>{
 
 app.post("/insert", (req, res) => {
     let params = req.body;
-    let query = "insert into chats values(?,?,?,?,?)"
-    let data = [params.userid, params.username, params.said, mysqlTime(new Date(params.data)), params.imgName]
+    let query = "insert into chats values(?,?,?,?,?,?)"
+    let data = [params.userid, params.username, params.input, mysqlTime(new Date(params.data)), params.imgName, params.type]
     
     var connection = mysql.createConnection(db);
     connection.connect();
@@ -67,7 +79,38 @@ app.post("/insert", (req, res) => {
         timerSession(params.userid);
     }, 1000*60*60);
     users.set(params.userid, userCurr);
-    info("User: " + params.username + " write message: " + params.said, 2)
+    info("User: " + params.username + " write message: " + params.input, 2)
+})
+
+app.post("/uploadFile", upload.single("file"), (req, res) => {
+    let params = req.body;
+    let file = req.file;
+    params.input = file.filename;
+
+    let query = "insert into chats values(?,?,?,?,?,?)"
+    let data = [params.userid, params.username, file.filename, mysqlTime(new Date(params.data)), params.imgName, params.type]
+    
+    var connection = mysql.createConnection(db);
+    connection.connect();
+    connection.query(query, data, function(err, result, fields){
+        if(err) {
+            console.log(err)
+            res.writeHead(500)
+            res.end("ko")
+        }else{
+            res.status(200).end(file.filename);
+            sendToAllMes(params);
+        }
+    })
+    connection.end();
+    
+    let userCurr = users.get(params.userid);
+    clearTimeout(userCurr.timer);
+    userCurr.timer = setTimeout(() => {
+        timerSession(params.userid);
+    }, 1000*60*60);
+    users.set(params.userid, userCurr);
+    info("User: " + params.username + " update file: " + file.filename.split("-")[1], 2)
 })
 
 let users = new Map();
@@ -120,10 +163,10 @@ app.post("/logout", (req, res) => {
 
 function sendToAllMes(params){
     let messaggio = JSON.stringify({
-        type: "messaggio",
+        type: params.type,
         userid: params.userid,
         username: params.username,
-        said: params.said,
+        input: params.input,
         data: params.data,
         imgName: params.imgName
     });

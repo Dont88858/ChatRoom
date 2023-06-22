@@ -12,8 +12,8 @@ let user = {
   imgName: ""
 }
 
-//export let host = "http://localhost:3001"
-export let host = "https://www.88858.it/chat"
+export let host = "http://localhost:3001"
+//export let host = "https://www.88858.it/chat"
 
 export default function App(){
   if (!sessionStorage.getItem("username")){
@@ -42,11 +42,12 @@ export default function App(){
       
       user.eventSource.onmessage = (e) => {
         let json = JSON.parse(e.data)
-        if (json.type === "messaggio"){
+        if (json.type === "messaggio" || json.type === "file" ){
           let newMes = {
+            type: json.type,
             userid: json.userid,
             username: json.username,
-            said: json.said,
+            input: json.input,
             data: json.data,
             imgName: json.imgName
           }
@@ -78,11 +79,12 @@ export default function App(){
     }
 
     let messaggio = {
+      type: "messaggio",
       userid: mes.id,
       username: mes.user,
-      said: mes.input.replaceAll("\\n", "\n"),
+      input: mes.input.replaceAll("\\n", "\n"),
       data: new Date(),
-      imgName: user.imgName
+      imgName: mes.imgName
     }
 
     fetch(host+"/insert", {
@@ -102,6 +104,49 @@ export default function App(){
     });
   }
 
+  function handleUpdateFile(data){
+    if(!data.get("file")){
+      toast.warning('Non è stato caricato corretamente il file', {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000
+      });
+      return
+    }
+
+    let messaggio = {
+      type: "file",
+      userid: data.get("userid"),
+      username: data.get("username"),
+      data: new Date(),
+      imgName: data.get("imgName")
+    }
+    data.append("data", messaggio.data);
+
+    fetch(host+"/uploadFile", {
+      async: false,
+      method: 'POST',
+      body: data,
+    }).then(res => {
+      if (res.status === 500){
+        toast.error('Avuto un problema sul server, il file non è stato caricato!', {
+          position: toast.POSITION.TOP_RIGHT,
+          autoClose: 7000
+        })
+        return ""
+      }else
+        return res.text();
+    }).then(res => {
+      if (res){
+        messaggio.input = res;
+        toast.info('File è stato caricato correttamente', {
+          position: toast.POSITION.TOP_RIGHT,
+          autoClose: 3000
+        });
+        setHistory(prev => [...prev, messaggio]);
+      }
+    })
+  }
+
   function updateHistory(){
     fetch(host+"/history")
       .then(res => res.json())
@@ -118,7 +163,7 @@ export default function App(){
   }
 
   if (sessionStorage.getItem("userid")){
-    return <ChatRoom user={user} data={History} onSend={handleSend} usersList={Users} onLogout={handleLogout} />;
+    return <ChatRoom user={user} data={History} onSend={handleSend} onFile={handleUpdateFile} usersList={Users} onLogout={handleLogout} />;
   }else
     return
 }
@@ -213,7 +258,7 @@ function notify(Mes){
         
         if (permission === "granted") {
           var notification = new Notification(Mes.username, {
-            body:  Mes.said,
+            body:  Mes.input,
             icon: "/cat/" + Mes.imgName
           });
     
