@@ -60,6 +60,8 @@ body {
 
 .own-message .message{
   float: right;
+  text-align: justify;
+  text-align-last: right; 
 }
 
 .other-message .message{

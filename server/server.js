@@ -142,10 +142,12 @@ function sendToAllRoom(){
 
 function timerSession(id) {
     let userCurr = users.get(id);
-    userCurr.res.write("event: message\n");
-    userCurr.res.write("data: " + JSON.stringify({type: "close", messaggio: "Closing the SSE connection"}) + "\n\n");
+    if(userCurr && userCurr.res){
+        userCurr.res.write("event: message\n");
+        userCurr.res.write("data: " + JSON.stringify({type: "close", messaggio: "Closing the SSE connection"}) + "\n\n");
+        info("User: " + userCurr.name + " session expired", 1)
+    }
     users.delete(id)
-    info("User: " + userCurr.name + " session expired", 1)
     sendToAllRoom()
 }
 
