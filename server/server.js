@@ -85,24 +85,30 @@ app.post("/insert", (req, res) => {
 app.post("/uploadFile", upload.single("file"), (req, res) => {
     let params = req.body;
     let file = req.file;
-    params.input = file.filename;
-
-    let query = "insert into chats values(?,?,?,?,?,?)"
-    let data = [params.userid, params.username, file.filename, mysqlTime(new Date(params.data)), params.imgName, params.type]
     
-    var connection = mysql.createConnection(db);
-    connection.connect();
-    connection.query(query, data, function(err, result, fields){
-        if(err) {
-            console.log(err)
-            res.writeHead(500)
-            res.end("ko")
-        }else{
-            res.status(200).end(file.filename);
-            sendToAllMes(params);
-        }
-    })
-    connection.end();
+    if(file.size > 50 * 1024 * 1024){
+        res.writeHead(500)
+        res.end("ko")
+    }else{
+        params.input = file.filename;
+    
+        let query = "insert into chats values(?,?,?,?,?,?)"
+        let data = [params.userid, params.username, file.filename, mysqlTime(new Date(params.data)), params.imgName, params.type]
+        
+        var connection = mysql.createConnection(db);
+        connection.connect();
+        connection.query(query, data, function(err, result, fields){
+            if(err) {
+                console.log(err)
+                res.writeHead(500)
+                res.end("ko")
+            }else{
+                res.status(200).end(file.filename);
+                sendToAllMes(params);
+            }
+        })
+        connection.end();
+    }
     
     let userCurr = users.get(params.userid);
     clearTimeout(userCurr.timer);

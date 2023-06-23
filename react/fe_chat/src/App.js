@@ -12,8 +12,8 @@ let user = {
   imgName: ""
 }
 
-export let host = "http://localhost:3001"
-//export let host = "https://www.88858.it/chat"
+//export let host = "http://localhost:3001"
+export let host = "https://www.88858.it/chat"
 
 export default function App(){
   if (!sessionStorage.getItem("username")){
@@ -113,38 +113,47 @@ export default function App(){
       return
     }
 
-    let messaggio = {
-      type: "file",
-      userid: data.get("userid"),
-      username: data.get("username"),
-      data: new Date(),
-      imgName: data.get("imgName")
-    }
-    data.append("data", messaggio.data);
+    toast.promise(uploadFile(data), {
+      pending: 'Updating... File: ' + data.get("file").name
+    });
 
-    fetch(host+"/uploadFile", {
-      async: false,
-      method: 'POST',
-      body: data,
-    }).then(res => {
-      if (res.status === 500){
-        toast.error('Avuto un problema sul server, il file non è stato caricato!', {
-          position: toast.POSITION.TOP_RIGHT,
-          autoClose: 7000
+    function uploadFile(data){
+      return new Promise((resolve, reject) => {
+        let messaggio = {
+          type: "file",
+          userid: data.get("userid"),
+          username: data.get("username"),
+          data: new Date(),
+          imgName: data.get("imgName")
+        }
+        data.append("data", messaggio.data);
+    
+        fetch(host+"/uploadFile", {
+          method: 'POST',
+          body: data,
+        }).then(res => {
+          if (res.status === 500){
+            toast.error('Avuto un problema sul server, il file non è stato caricato!', {
+              position: toast.POSITION.TOP_RIGHT,
+              autoClose: 7000
+            })
+            reject();
+            return ""
+          }else
+            return res.text();
+        }).then(res => {
+          if (res){
+            messaggio.input = res;
+            toast.info('File è stato caricato correttamente', {
+              position: toast.POSITION.TOP_RIGHT,
+              autoClose: 3000
+            });
+            resolve();
+            setHistory(prev => [...prev, messaggio]);
+          }
         })
-        return ""
-      }else
-        return res.text();
-    }).then(res => {
-      if (res){
-        messaggio.input = res;
-        toast.info('File è stato caricato correttamente', {
-          position: toast.POSITION.TOP_RIGHT,
-          autoClose: 3000
-        });
-        setHistory(prev => [...prev, messaggio]);
-      }
-    })
+      })
+    }
   }
 
   function updateHistory(){

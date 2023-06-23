@@ -158,9 +158,14 @@ function Message(props){
 function uploadFile(){
     const maxFileSize = 50 * 1024 * 1024;
     if ($("#file-upload").prop("files")[0].size > maxFileSize) {
-        toast.warning('Dimesione di file ha superato limite di 50MB!', {
+        toast.warning('La dimesione di file ha superato limite di 50MB!', {
             position: toast.POSITION.TOP_RIGHT,
-            autoClose: 8000
+            autoClose: 5000
+        });
+    }else if ($("#file-upload").prop("files")[0].name.indexOf("-") >= 0){
+        toast.warning('Il nome di file non può contenere simbolo "-"', {
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: 5000
         });
     }else{
         $("#mesType").val("file")
